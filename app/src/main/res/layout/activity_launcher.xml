@@ -40,7 +40,7 @@
         app:layout_constraintStart_toStartOf="parent" 
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- ✅ BARRE DE TOGGLE — AU-DESSUS DU DOCK ! -->
+    <!-- ✅ BARRE DE TOGGLE — AU-DESSUS DU DOCK -->
     <TextView 
         android:id="@+id/toggleBar" 
         android:layout_width="60dp" 

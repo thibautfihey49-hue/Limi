@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -22,7 +24,6 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var dockAdapter: DockAdapter
     private var isDrawerOpen = false
     
-    // ✅ Récepteur : met à jour le fond quand il change
     private val wallpaperReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             applyWallpaper()
@@ -36,10 +37,14 @@ class LauncherActivity : AppCompatActivity() {
 
         dockManager = DockManager(this)
 
-        // ✅ Appliquer le fond d'écran IMMÉDIATEMENT
+        // ✅ ACTIVER LE FOND D'ÉCRAN DU SYSTÈME — MÉTHODE OFFICIELLE
+        window.setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER,
+            android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+        )
+
         applyWallpaper()
         
-        // ✅ Écouter les changements de fond
         registerReceiver(
             wallpaperReceiver,
             IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)
@@ -79,7 +84,7 @@ class LauncherActivity : AppCompatActivity() {
             }
         })
 
-        // ✅ BARRE DE TOGGLE — AU-DESSUS DU DOCK
+        // ✅ BARRE DE TOGGLE
         binding.toggleBar.setOnClickListener { toggleDrawer() }
 
         // ✅ APPUI LONG = CHANGER FOND D'ÉCRAN
@@ -90,7 +95,7 @@ class LauncherActivity : AppCompatActivity() {
             true
         }
 
-        // ✅ GLISSER VERS LE BAS = OUVRE / HAUT = FERME
+        // ✅ GLISSER
         val detector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
                 if (e1 == null) return false
@@ -103,13 +108,14 @@ class LauncherActivity : AppCompatActivity() {
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
     }
 
-    // ✅ Appliquer le fond d'écran du téléphone au launcher
+    // ✅ MÉTHODE SIMPLE ET COMPATIBLE TOUTES VERSIONS
     private fun applyWallpaper() {
         try {
-            val wp = WallpaperManager.getInstance(this).drawable
-            binding.root.background = wp
-        } catch (_: Exception) {
-            // Si erreur, on ne fait rien
+            val wpManager = WallpaperManager.getInstance(this)
+            val drawable = wpManager.drawable
+            binding.root.background = drawable
+        } catch (e: Exception) {
+            android.util.Log.e("Limi", "Impossible de charger le fond", e)
         }
     }
 
