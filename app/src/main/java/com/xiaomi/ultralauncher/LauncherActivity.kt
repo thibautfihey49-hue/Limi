@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,7 +22,8 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var drawerAdapter: AppDrawerAdapter
     private lateinit var dockAdapter: DockAdapter
     private var isDrawerOpen = false
-    
+    private val interpolator = DecelerateInterpolator(1.5f)
+
     private val wallpaperReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             applyWallpaper()
@@ -35,7 +37,7 @@ class LauncherActivity : AppCompatActivity() {
 
         dockManager = DockManager(this)
 
-        // ✅ Fond d'écran — TRANSPARENT OBLIGATOIRE
+        // ✅ Fond d'écran transparent
         window.decorView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         binding.root.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         window.setFlags(
@@ -44,17 +46,19 @@ class LauncherActivity : AppCompatActivity() {
         )
 
         applyWallpaper()
-        
-        registerReceiver(
-            wallpaperReceiver,
-            IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)
-        )
+        registerReceiver(wallpaperReceiver, IntentFilter(Intent.ACTION_WALLPAPER_CHANGED))
 
-        val sdfTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.FRANCE)
-        binding.clockText.text = sdfTime.format(java.util.Date())
-        val sdfDate = java.text.SimpleDateFormat("EEEE d MMMM", java.util.Locale.FRANCE)
-        binding.dateText.text = sdfDate.format(java.util.Date())
+        // ✅ Horloge instantanée — MAJ chaque minute SANS retard
+        updateClock()
+        val clockRunnable = object : Runnable {
+            override fun run() {
+                updateClock()
+                binding.clockText.postDelayed(this, 60000)
+            }
+        }
+        binding.clockText.postDelayed(clockRunnable, 60000 - System.currentTimeMillis() % 60000)
 
+        // ✅ Dock — SANS animation, chargement IMMÉDIAT
         dockAdapter = DockAdapter(
             dockManager.getDockApps(),
             { pkg -> AppManager.launchApp(this, pkg) },
@@ -65,58 +69,71 @@ class LauncherActivity : AppCompatActivity() {
         )
         binding.dockRecycler.layoutManager = GridLayoutManager(this, 7)
         binding.dockRecycler.adapter = dockAdapter
-        binding.dockRecycler.itemAnimator = null
+        binding.dockRecycler.isNestedScrollingEnabled = false
 
-        val apps = AppManager.getInstalledApps(this)
-        drawerAdapter = AppDrawerAdapter(apps) { app ->
-            AppManager.launchApp(this, app.packageName)
-            closeDrawer()
+        // ✅ Tiroir — chargement DIFFÉRÉ pour affichage instantané
+        binding.drawerContainer.visibility = View.GONE
+        binding.root.viewTreeObserver.addOnPreDrawListener {
+            if (!::drawerAdapter.isInitialized) {
+                val apps = AppManager.getInstalledApps(this)
+                drawerAdapter = AppDrawerAdapter(apps) { app ->
+                    AppManager.launchApp(this, app.packageName)
+                    closeDrawer()
+                }
+                binding.drawerRecycler.layoutManager = GridLayoutManager(this, 4)
+                binding.drawerRecycler.adapter = drawerAdapter
+                binding.drawerRecycler.isNestedScrollingEnabled = false
+            }
+            true
         }
-        binding.drawerRecycler.layoutManager = GridLayoutManager(this, 4)
-        binding.drawerRecycler.adapter = drawerAdapter
-        binding.drawerRecycler.itemAnimator = null
 
+        // ✅ Recherche — filtrée sans délai
         binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(q: String?) = false
             override fun onQueryTextChange(t: String?): Boolean {
-                drawerAdapter.filter(t ?: "")
+                if (::drawerAdapter.isInitialized) drawerAdapter.filter(t ?: "")
                 return true
             }
         })
 
-        // ✅ BARRE — GRANDE ZONE DE CLIC
+        // ✅ BARRE DE TOGGLE — CLIC INSTANTANÉ, SANS DÉLAI
         binding.toggleBar.setOnClickListener { toggleDrawer() }
 
-        // ✅ APPUI LONG = CHANGER FOND D'ÉCRAN
+        // ✅ APPUI LONG — CHANGER FOND D'ÉCRAN
         binding.root.setOnLongClickListener {
             val intent = Intent(Intent.ACTION_SET_WALLPAPER)
-            startActivity(Intent.createChooser(intent, "Choisir un fond d'écran"))
-            Toast.makeText(this, "Choisissez votre fond d'écran", Toast.LENGTH_SHORT).show()
+            startActivity(Intent.createChooser(intent, "Choisir un fond"))
+            Toast.makeText(this, "Choisissez votre fond", Toast.LENGTH_SHORT).show()
             true
         }
 
-        // ✅ GLISSER
+        // ✅ GESTURES — INSTANTANÉES, SANS DÉLAI
         val detector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
                 if (e1 == null) return false
                 val dy = e2.y - e1.y
-                if (dy > 200 && abs(vy) > 500) { openDrawer(); return true }
-                if (dy < -200 && abs(vy) > 500) { closeDrawer(); return true }
+                if (dy > 150 && abs(vy) > 400) { openDrawer(); return true }
+                if (dy < -150 && abs(vy) > 400) { closeDrawer(); return true }
                 return false
             }
         })
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
     }
 
-    private fun applyWallpaper() {
-        try {
-            val wpManager = WallpaperManager.getInstance(this)
-            binding.root.background = wpManager.drawable
-        } catch (e: Exception) {
-            android.util.Log.e("Limi", "Fond non chargé", e)
-        }
+    private fun updateClock() {
+        val sdfTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.FRANCE)
+        binding.clockText.text = sdfTime.format(java.util.Date())
+        val sdfDate = java.text.SimpleDateFormat("EEEE d MMM", java.util.Locale.FRANCE)
+        binding.dateText.text = sdfDate.format(java.util.Date())
     }
 
+    private fun applyWallpaper() {
+        try {
+            binding.root.background = WallpaperManager.getInstance(this).drawable
+        } catch (_: Exception) {}
+    }
+
+    // ✅ TOGGLE — INSTANTANÉ, ANIMATION RAPIDE
     private fun toggleDrawer() {
         if (isDrawerOpen) closeDrawer() else openDrawer()
     }
@@ -125,15 +142,25 @@ class LauncherActivity : AppCompatActivity() {
         if (isDrawerOpen) return
         isDrawerOpen = true
         binding.drawerContainer.visibility = View.VISIBLE
-        binding.drawerContainer.animate().translationY(0f).setDuration(220).start()
-        drawerAdapter.updateList(AppManager.getInstalledApps(this, true))
+        binding.drawerContainer.animate()
+            .translationY(0f)
+            .setDuration(150)
+            .setInterpolator(interpolator)
+            .start()
+        if (::drawerAdapter.isInitialized) {
+            drawerAdapter.updateList(AppManager.getInstalledApps(this, true))
+        }
     }
 
     fun closeDrawer() {
         if (!isDrawerOpen) return
         isDrawerOpen = false
-        binding.drawerContainer.animate().translationY(1000f).setDuration(180)
-            .withEndAction { binding.drawerContainer.visibility = View.GONE }.start()
+        binding.drawerContainer.animate()
+            .translationY(1000f)
+            .setDuration(120)
+            .setInterpolator(interpolator)
+            .withEndAction { binding.drawerContainer.visibility = View.GONE }
+            .start()
     }
 
     override fun onBackPressed() {

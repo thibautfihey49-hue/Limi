@@ -11,9 +11,8 @@ class AppDrawerAdapter(
     private val onClick: (AppInfo) -> Unit
 ) : RecyclerView.Adapter<AppDrawerAdapter.VH>() {
 
-    private var filtered = apps.toList()
-
-    class VH(val binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root)
+    private var filtered = apps
+    inner class VH(val binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
         VH(ItemAppBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -28,7 +27,7 @@ class AppDrawerAdapter(
     override fun getItemCount() = filtered.size
 
     fun filter(query: String) {
-        filtered = if (query.isBlank()) apps
+        filtered = if (query.isEmpty()) apps
         else apps.filter { it.label.contains(query, ignoreCase = true) }
         notifyDataSetChanged()
     }
@@ -46,7 +45,7 @@ class DockAdapter(
     private val onLongClick: (Int) -> Unit
 ) : RecyclerView.Adapter<DockAdapter.VH>() {
 
-    class VH(val binding: ItemDockBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class VH(val binding: ItemDockBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
         VH(ItemDockBinding.inflate(LayoutInflater.from(parent.context), parent, false))

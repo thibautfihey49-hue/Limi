@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" 
     android:id="@+id/root" 
     android:layout_width="match_parent" 
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:clipChildren="false">
 
     <LinearLayout 
         android:layout_width="match_parent" 
@@ -18,38 +20,27 @@
             android:layout_height="wrap_content" 
             android:text="21:42" 
             android:textSize="56sp" 
-            android:fontFamily="sans-serif-light"/>
+            android:fontFamily="sans-serif-light"
+            android:includeFontPadding="false"/>
         <TextView 
             android:id="@+id/dateText" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
-            android:text="Limi • Ultra Light" 
+            android:text="Limi" 
             android:textSize="13sp" 
-            android:textColor="#8A8A8E"/>
+            android:textColor="#8A8A8E"
+            android:includeFontPadding="false"/>
     </LinearLayout>
 
-    <!-- ✅ GRANDE ZONE DE CLIC — Invisible mais cliquable -->
-    <TextView 
+    <!-- ✅ GRANDE ZONE DE CLIC — RAPIDE ET SANS DÉLAI -->
+    <View 
         android:id="@+id/toggleBar" 
         android:layout_width="120dp" 
         android:layout_height="48dp"
         android:background="@drawable/bg_toggle_bar"
-        android:gravity="center"
         android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toTopOf="@id/dockContainer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <TextView 
-        android:id="@+id/swipeHint" 
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content" 
-        android:text="↓ Glisser ou toucher la barre" 
-        android:paddingBottom="8dp"
-        android:textSize="12sp"
-        android:textColor="#999999"
-        app:layout_constraintBottom_toTopOf="@id/toggleBar"
-        app:layout_constraintStart_toStartOf="parent" 
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <LinearLayout 
@@ -58,7 +49,8 @@
         android:layout_height="wrap_content" 
         android:orientation="vertical" 
         android:layout_margin="12dp" 
-        android:background="@drawable/bg_dock" 
+        android:background="@drawable/bg_dock"
+        android:padding="0dp"
         app:layout_constraintBottom_toBottomOf="parent" 
         app:layout_constraintStart_toStartOf="parent" 
         app:layout_constraintEnd_toEndOf="parent">
@@ -66,7 +58,9 @@
             android:id="@+id/dockRecycler" 
             android:layout_width="match_parent" 
             android:layout_height="84dp" 
-            android:padding="8dp"/>
+            android:padding="8dp"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"/>
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout 
@@ -74,23 +68,26 @@
         android:layout_width="match_parent" 
         android:layout_height="match_parent" 
         android:visibility="gone" 
-        android:background="@color/bg" 
+        android:background="@color/bg"
+        android:elevation="0dp"
         android:translationY="1000dp">
         <androidx.appcompat.widget.SearchView 
             android:id="@+id/searchView" 
             android:layout_width="0dp" 
             android:layout_height="wrap_content" 
             android:layout_margin="16dp" 
-            android:background="@drawable/bg_search" 
+            android:background="@drawable/bg_search"
             app:queryHint="@string/search_hint" 
-            app:iconifiedByDefault="false" 
+            app:iconifiedByDefault="false"
             app:layout_constraintTop_toTopOf="parent" 
             app:layout_constraintStart_toStartOf="parent" 
             app:layout_constraintEnd_toEndOf="parent"/>
         <androidx.recyclerview.widget.RecyclerView 
             android:id="@+id/drawerRecycler" 
             android:layout_width="match_parent" 
-            android:layout_height="0dp" 
+            android:layout_height="0dp"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@id/searchView" 
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>

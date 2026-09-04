@@ -11,6 +11,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0-ultra-light"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         debug { isDebuggable = true }
@@ -26,6 +27,7 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { viewBinding = true }
+    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")

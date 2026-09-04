@@ -9,17 +9,17 @@ data class AppInfo(
     val label: String,
     val icon: Drawable
 ) : Comparable<AppInfo> {
-    override fun compareTo(other: AppInfo) =
-        label.lowercase().compareTo(other.label.lowercase())
+    override fun compareTo(other: AppInfo) = label.compareTo(other.label, ignoreCase = true)
 }
 
 object AppManager {
     private var cache: List<AppInfo>? = null
     private var lastRefresh = 0L
+    private const val CACHE_DURATION = 3600000 // 1 heure — pas de rechargement inutile
 
     fun getInstalledApps(ctx: Context, force: Boolean = false): List<AppInfo> {
         val now = System.currentTimeMillis()
-        if (!force && cache != null && now - lastRefresh < 30000) return cache!!
+        if (!force && cache != null && now - lastRefresh < CACHE_DURATION) return cache!!
 
         val pm = ctx.packageManager
         val intent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
@@ -37,9 +37,7 @@ object AppManager {
 
     fun launchApp(ctx: Context, pkg: String) {
         try {
-            val i = ctx.packageManager.getLaunchIntentForPackage(pkg)
-            i?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            ctx.startActivity(i)
+            ctx.startActivity(ctx.packageManager.getLaunchIntentForPackage(pkg)!!.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (_: Exception) {}
     }
 }

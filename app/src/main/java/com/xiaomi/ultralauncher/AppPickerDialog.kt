@@ -11,23 +11,14 @@ class AppPickerDialog(
     private val onSelected: (String) -> Unit
 ) : Dialog(context) {
 
-    private lateinit var binding: DialogAppPickerBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DialogAppPickerBinding.inflate(layoutInflater)
+        val binding = DialogAppPickerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        window?.setLayout(
-            (context.resources.displayMetrics.widthPixels * 0.9).toInt(),
-            (context.resources.displayMetrics.heightPixels * 0.7).toInt()
-        )
-
-        val apps = AppManager.getInstalledApps(context)
+        window?.setLayout((context.resources.displayMetrics.widthPixels * 0.9).toInt(), (context.resources.displayMetrics.heightPixels * 0.7).toInt())
         binding.pickerRecycler.layoutManager = GridLayoutManager(context, 4)
-        binding.pickerRecycler.adapter = AppDrawerAdapter(apps) {
-            onSelected(it.packageName)
-            dismiss()
+        binding.pickerRecycler.adapter = AppDrawerAdapter(AppManager.getInstalledApps(context)) {
+            onSelected(it.packageName); dismiss()
         }
     }
 }
