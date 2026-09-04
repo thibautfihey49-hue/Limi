@@ -1,7 +1,10 @@
 package com.xiaomi.ultralauncher
 
 import android.app.WallpaperManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -18,6 +21,13 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var drawerAdapter: AppDrawerAdapter
     private lateinit var dockAdapter: DockAdapter
     private var isDrawerOpen = false
+    
+    // ✅ Récepteur : met à jour le fond quand il change
+    private val wallpaperReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            applyWallpaper()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +36,14 @@ class LauncherActivity : AppCompatActivity() {
 
         dockManager = DockManager(this)
 
-        try {
-            window.setBackgroundDrawable(WallpaperManager.getInstance(this).drawable)
-        } catch (_: Exception) {}
+        // ✅ Appliquer le fond d'écran IMMÉDIATEMENT
+        applyWallpaper()
+        
+        // ✅ Écouter les changements de fond
+        registerReceiver(
+            wallpaperReceiver,
+            IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)
+        )
 
         val sdfTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.FRANCE)
         binding.clockText.text = sdfTime.format(java.util.Date())
@@ -64,10 +79,10 @@ class LauncherActivity : AppCompatActivity() {
             }
         })
 
-        // ✅ BARRE DE TOGGLE — UN CLIC = OUVRE/FERME
+        // ✅ BARRE DE TOGGLE — AU-DESSUS DU DOCK
         binding.toggleBar.setOnClickListener { toggleDrawer() }
 
-        // ✅ APPUI LONG N'IMPORTE OU = CHANGER FOND D'ÉCRAN
+        // ✅ APPUI LONG = CHANGER FOND D'ÉCRAN
         binding.root.setOnLongClickListener {
             val intent = Intent(Intent.ACTION_SET_WALLPAPER)
             startActivity(Intent.createChooser(intent, "Choisir un fond d'écran"))
@@ -75,20 +90,29 @@ class LauncherActivity : AppCompatActivity() {
             true
         }
 
-        // ✅ GLISSER VERS LE HAUT/BAS TOUJOURS FONCTIONNE
+        // ✅ GLISSER VERS LE BAS = OUVRE / HAUT = FERME
         val detector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
                 if (e1 == null) return false
                 val dy = e2.y - e1.y
-                if (dy < -200 && abs(vy) > 500) { openDrawer(); return true }
-                if (dy > 200 && abs(vy) > 500) { closeDrawer(); return true }
+                if (dy > 200 && abs(vy) > 500) { openDrawer(); return true }
+                if (dy < -200 && abs(vy) > 500) { closeDrawer(); return true }
                 return false
             }
         })
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
     }
 
-    // ✅ FONCTION TOGGLE — SIMPLE
+    // ✅ Appliquer le fond d'écran du téléphone au launcher
+    private fun applyWallpaper() {
+        try {
+            val wp = WallpaperManager.getInstance(this).drawable
+            binding.root.background = wp
+        } catch (_: Exception) {
+            // Si erreur, on ne fait rien
+        }
+    }
+
     private fun toggleDrawer() {
         if (isDrawerOpen) closeDrawer() else openDrawer()
     }
@@ -110,5 +134,10 @@ class LauncherActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (isDrawerOpen) closeDrawer() else super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(wallpaperReceiver)
     }
 }
