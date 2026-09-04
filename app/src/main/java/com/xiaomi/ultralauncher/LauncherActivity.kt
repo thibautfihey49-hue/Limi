@@ -35,7 +35,7 @@ class LauncherActivity : AppCompatActivity() {
 
         dockManager = DockManager(this)
 
-        // ✅ MÉTHODE DÉFINITIVE : Le fond d'écran est géré PAR LA FENÊTRE, pas par le layout
+        // ✅ Fond d'écran — TRANSPARENT OBLIGATOIRE
         window.decorView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         binding.root.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         window.setFlags(
@@ -84,7 +84,7 @@ class LauncherActivity : AppCompatActivity() {
             }
         })
 
-        // ✅ BARRE DE TOGGLE
+        // ✅ BARRE — GRANDE ZONE DE CLIC
         binding.toggleBar.setOnClickListener { toggleDrawer() }
 
         // ✅ APPUI LONG = CHANGER FOND D'ÉCRAN
@@ -108,7 +108,6 @@ class LauncherActivity : AppCompatActivity() {
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
     }
 
-    // ✅ Méthode de secours si FLAG ne suffit pas
     private fun applyWallpaper() {
         try {
             val wpManager = WallpaperManager.getInstance(this)
