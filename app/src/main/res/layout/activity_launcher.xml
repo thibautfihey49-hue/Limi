@@ -33,20 +33,20 @@
         android:layout_width="wrap_content" 
         android:layout_height="wrap_content" 
         android:text="↓ Glisser ou toucher la barre" 
-        android:paddingBottom="4dp"
+        android:paddingBottom="12dp"
         android:textSize="12sp"
         android:textColor="#999999"
         app:layout_constraintBottom_toTopOf="@id/toggleBar"
         app:layout_constraintStart_toStartOf="parent" 
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- ✅ BARRE DE TOGGLE — AU-DESSUS DU DOCK -->
+    <!-- ✅ BARRE — PLUS ESPACÉE DU DOCK (32dp au lieu de 8dp) -->
     <TextView 
         android:id="@+id/toggleBar" 
         android:layout_width="60dp" 
         android:layout_height="6dp" 
         android:background="@drawable/bg_toggle_bar" 
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toTopOf="@id/dockContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

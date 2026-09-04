@@ -5,8 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -37,7 +35,9 @@ class LauncherActivity : AppCompatActivity() {
 
         dockManager = DockManager(this)
 
-        // ✅ ACTIVER LE FOND D'ÉCRAN DU SYSTÈME — MÉTHODE OFFICIELLE
+        // ✅ MÉTHODE DÉFINITIVE : Le fond d'écran est géré PAR LA FENÊTRE, pas par le layout
+        window.decorView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        binding.root.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         window.setFlags(
             android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER,
             android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
@@ -108,14 +108,13 @@ class LauncherActivity : AppCompatActivity() {
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
     }
 
-    // ✅ MÉTHODE SIMPLE ET COMPATIBLE TOUTES VERSIONS
+    // ✅ Méthode de secours si FLAG ne suffit pas
     private fun applyWallpaper() {
         try {
             val wpManager = WallpaperManager.getInstance(this)
-            val drawable = wpManager.drawable
-            binding.root.background = drawable
+            binding.root.background = wpManager.drawable
         } catch (e: Exception) {
-            android.util.Log.e("Limi", "Impossible de charger le fond", e)
+            android.util.Log.e("Limi", "Fond non chargé", e)
         }
     }
 
