@@ -46,7 +46,7 @@ class DockAdapter(
     private val onLongClick: (Int) -> Unit
 ) : RecyclerView.Adapter<DockAdapter.VH>() {
 
-    class VH(val binding: ItemDockBinding) : RecyclerView.ViewView(binding.root)
+    class VH(val binding: ItemDockBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
         VH(ItemDockBinding.inflate(LayoutInflater.from(parent.context), parent, false))
