@@ -22,9 +22,18 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: 🔧 Génère Gradle wrapper (CRÉE le .jar !)
+      - name: 🔧 Setup Gradle wrapper v8.2
         run: |
-          gradle wrapper --gradle-version 8.2
+          mkdir -p gradle/wrapper
+          cat > gradle/wrapper/gradle-wrapper.properties << 'INNER'
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+INNER
           chmod +x gradlew
           ls -la gradle/wrapper/
 
