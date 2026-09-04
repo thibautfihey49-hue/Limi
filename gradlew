@@ -1,7 +1,4 @@
 #!/bin/sh
-##############################################################################
-## Gradle start-up script
-##############################################################################
 APP_HOME=$( cd "$( dirname "$0" )" && pwd )
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 if [ -z "$JAVA_HOME" ] ; then
