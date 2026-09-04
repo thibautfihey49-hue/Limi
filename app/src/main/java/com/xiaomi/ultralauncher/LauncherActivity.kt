@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xiaomi.ultralauncher.databinding.ActivityLauncherBinding
@@ -63,6 +64,18 @@ class LauncherActivity : AppCompatActivity() {
             }
         })
 
+        // ✅ BARRE DE TOGGLE — UN CLIC = OUVRE/FERME
+        binding.toggleBar.setOnClickListener { toggleDrawer() }
+
+        // ✅ APPUI LONG N'IMPORTE OU = CHANGER FOND D'ÉCRAN
+        binding.root.setOnLongClickListener {
+            val intent = Intent(Intent.ACTION_SET_WALLPAPER)
+            startActivity(Intent.createChooser(intent, "Choisir un fond d'écran"))
+            Toast.makeText(this, "Choisissez votre fond d'écran", Toast.LENGTH_SHORT).show()
+            true
+        }
+
+        // ✅ GLISSER VERS LE HAUT/BAS TOUJOURS FONCTIONNE
         val detector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
                 if (e1 == null) return false
@@ -73,7 +86,11 @@ class LauncherActivity : AppCompatActivity() {
             }
         })
         binding.root.setOnTouchListener { _, e -> detector.onTouchEvent(e); false }
-        binding.swipeHint.setOnClickListener { openDrawer() }
+    }
+
+    // ✅ FONCTION TOGGLE — SIMPLE
+    private fun toggleDrawer() {
+        if (isDrawerOpen) closeDrawer() else openDrawer()
     }
 
     fun openDrawer() {
