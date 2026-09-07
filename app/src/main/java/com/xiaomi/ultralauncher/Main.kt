@@ -145,13 +145,14 @@ class MainActivity : AppCompatActivity() {
                 "com.android.dialer",
                 "com.google.android.gm",
                 "com.android.chrome",
-                "com.google.android.apps.photos",
+                "",
                 "com.whatsapp",
-                "com.spotify.music",
-                "com.android.camera2"
+                "",
+                ""
             )
             repeat(DOCK_SIZE) { i ->
-                dockSlots.add(DockSlot(defaultPkgs.getOrNull(i)))
+                val pkg = defaultPkgs.getOrNull(i)
+                dockSlots.add(DockSlot(if (pkg.isNullOrEmpty()) null else pkg))
             }
         }
     }
@@ -253,13 +254,24 @@ class MainActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: VH, position: Int) {
             try {
                 val slot = dockSlots[position]
+
                 if (slot.pkg != null) {
+                    // ✅ Emplacement REMPLI : icône de l'app
                     holder.icon.setImageDrawable(packageManager.getApplicationIcon(slot.pkg!!))
+                    // Clic court = lancer l'app
+                    holder.itemView.setOnClickListener { slot.pkg?.let { launch(it) } }
                 } else {
+                    // ✅ Emplacement VIDE : icône +
                     holder.icon.setImageResource(R.drawable.ic_empty_slot)
+                    // Clic court = OUVRIR LE CHOIX D'APP DIRECTEMENT
+                    holder.itemView.setOnClickListener { showAppPicker(position) }
                 }
-                holder.itemView.setOnClickListener { slot.pkg?.let { launch(it) } }
-                holder.itemView.setOnLongClickListener { showAppPicker(position); true }
+
+                // ✅ CLIC LONG = TOUJOURS pour changer ou vider
+                holder.itemView.setOnLongClickListener {
+                    showAppPicker(position)
+                    true
+                }
             } catch (_: Exception) {}
         }
         override fun getItemCount() = DOCK_SIZE

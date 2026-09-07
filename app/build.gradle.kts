@@ -10,7 +10,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0-editable-dock"
+        versionName = "1.0-fix-empty-slots"
     }
     buildTypes {
         debug { isDebuggable = true }

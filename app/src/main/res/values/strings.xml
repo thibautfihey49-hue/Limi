@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Limi</string>
     <string name="pick_app">Choisir une application</string>
-    <string name="empty_slot">Vide</string>
+    <string name="empty_slot">Ajouter</string>
 </resources>

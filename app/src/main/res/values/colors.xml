@@ -3,4 +3,6 @@
     <color name="dock_bg">#E8E8EAEE</color>
     <color name="search_bg">#EEEEF0</color>
     <color name="ic_launcher_bg">#E8E8EAEE</color>
+    <color name="empty_slot_bg">#DDDDDD</color>
+    <color name="empty_slot_plus">#666666</color>
 </resources>

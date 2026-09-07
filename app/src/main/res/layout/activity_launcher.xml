@@ -16,18 +16,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="64sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#FF000000"
             android:fontFamily="sans-serif-light"
-            android:shadowColor="#000000"
+            android:shadowColor="#FFFFFF"
             android:shadowDx="0"
             android:shadowDy="1"
-            android:shadowRadius="3"/>
+            android:shadowRadius="2"/>
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="#E0E0E0"
+            android:textColor="#FF666666"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
@@ -37,7 +37,7 @@
         android:layout_height="56dp"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="140dp"
-        android:background="#20FFFFFF"/>
+        android:background="#20000000"/>
 
     <LinearLayout
         android:id="@+id/dock"
