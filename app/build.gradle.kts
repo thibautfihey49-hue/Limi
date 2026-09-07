@@ -16,9 +16,7 @@ android {
     }
 
     buildTypes {
-        debug {
-            isDebuggable = true
-        }
+        debug { isDebuggable = true }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -30,13 +28,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    kotlinOptions { jvmTarget = "17" }
 
-    buildFeatures {
-        viewBinding = false
-    }
+    buildFeatures { viewBinding = false }
 }
 
 dependencies {
