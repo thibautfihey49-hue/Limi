@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION, Intent.FLAG_ACTIVITY_NO_ANIMATION)
         setContentView(R.layout.activity_launcher)
 
-        // ✅ Récupération SÉCURE des vues
         root = findViewById(R.id.root)
         clock = findViewById(R.id.clock)
         date = findViewById(R.id.date)
@@ -62,15 +61,14 @@ class MainActivity : AppCompatActivity() {
         dockRecycler = findViewById(R.id.dockRecycler)
         drawer = findViewById(R.id.drawer)
 
-        // ✅ Fond d'écran SÉCURE
+        // ✅ Fond d'écran — CORRIGÉ : decorView pour setBackgroundColor
         try {
             val wallpaperManager = WallpaperManager.getInstance(this)
             window.setBackgroundDrawable(wallpaperManager.drawable)
         } catch (e: Exception) {
-            window.setBackgroundColor(0xFFF5F5F5.toInt())
+            window.decorView.setBackgroundColor(0xFFF5F5F5.toInt())
         }
 
-        // ✅ Horloge
         updateClock()
         clock?.postDelayed(object : Runnable {
             override fun run() {
@@ -79,25 +77,20 @@ class MainActivity : AppCompatActivity() {
             }
         }, 60000 - System.currentTimeMillis() % 60000)
 
-        // ✅ Chargement apps
         loadApps()
 
-        // ✅ Dock
         dockRecycler?.apply {
             layoutManager = GridLayoutManager(this@MainActivity, 7)
             adapter = DockAdapter()
         }
 
-        // ✅ Tiroir
         drawer?.apply {
             layoutManager = GridLayoutManager(this@MainActivity, 4)
             adapter = AppAdapter()
         }
 
-        // ✅ Clic barre
         toggleBar?.setOnClickListener { toggle() }
 
-        // ✅ Appui long = fond d'écran
         root?.setOnLongClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
@@ -105,7 +98,6 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // ✅ Glisser
         val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(
                 e1: MotionEvent?,
@@ -189,7 +181,6 @@ class MainActivity : AppCompatActivity() {
         if (open) closeDrawer()
     }
 
-    // ✅ Adapter Apps
     inner class AppAdapter : RecyclerView.Adapter<AppAdapter.VH>() {
         inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val icon: ImageView = itemView.findViewById(R.id.appIcon)
@@ -214,7 +205,6 @@ class MainActivity : AppCompatActivity() {
         override fun getItemCount(): Int = apps.size
     }
 
-    // ✅ Adapter Dock
     inner class DockAdapter : RecyclerView.Adapter<DockAdapter.VH>() {
         inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val icon: ImageView = itemView.findViewById(R.id.dockIcon)
