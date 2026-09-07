@@ -1,5 +1,3 @@
 <resources>
-    <color name="bg">#F7F7F8</color>
-    <color name="dock_bg">#E8E8EAEE</color>
-    <color name="search_bg">#EEEEF0</color>
+    <color name="bg">#F5F5F5F5</color>
 </resources>
