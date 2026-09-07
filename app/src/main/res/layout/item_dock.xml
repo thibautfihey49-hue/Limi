@@ -3,4 +3,5 @@
     android:id="@+id/dockIcon"
     android:layout_width="48dp"
     android:layout_height="48dp"
-    android:padding="4dp"/>
+    android:padding="4dp"
+    android:contentDescription="@string/app_name"/>
