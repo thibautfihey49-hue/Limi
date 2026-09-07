@@ -46,36 +46,28 @@ class MainActivity : AppCompatActivity() {
         dockRecycler = findViewById(R.id.dockRecycler)
         drawer = findViewById(R.id.drawer)
 
-        // ✅ Fond d'écran
         window.setBackgroundDrawable(WallpaperManager.getInstance(this).drawable)
 
-        // ✅ Horloge
         updateClock()
         clock.postDelayed(object : Runnable {
             override fun run() { updateClock(); clock.postDelayed(this, 60000) }
         }, 60000 - System.currentTimeMillis() % 60000)
 
-        // ✅ Chargement apps
         loadApps()
 
-        // ✅ Dock
         dockRecycler.layoutManager = GridLayoutManager(this, 7)
         dockRecycler.adapter = DockAdapter()
 
-        // ✅ Tiroir
         drawer.layoutManager = GridLayoutManager(this, 4)
         drawer.adapter = AppAdapter()
 
-        // ✅ CLIC — INSTANTANÉ, SANS ANIMATION
         toggleBar.setOnClickListener { toggle() }
 
-        // ✅ Appui long = fond d'écran
         root.setOnLongClickListener {
             startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
             true
         }
 
-        // ✅ Glisser
         val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
                 if (e1 == null) return false
@@ -101,20 +93,9 @@ class MainActivity : AppCompatActivity() {
         }.sortedBy { it.name.lowercase() }
     }
 
-    // ✅ SANS ANIMATION — AFFICHAGE INSTANTANÉ
     private fun toggle() { if (open) close() else open() }
-
-    private fun open() {
-        if (open) return
-        open = true
-        drawer.visibility = View.VISIBLE
-    }
-
-    private fun close() {
-        if (!open) return
-        open = false
-        drawer.visibility = View.GONE
-    }
+    private fun open() { if (open) return; open = true; drawer.visibility = View.VISIBLE }
+    private fun close() { if (!open) return; open = false; drawer.visibility = View.GONE }
 
     private fun launch(pkg: String) {
         try {

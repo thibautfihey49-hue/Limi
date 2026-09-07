@@ -31,7 +31,6 @@
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
-    <!-- ✅ GRANDE ZONE DE CLIC -->
     <View
         android:id="@+id/toggleBar"
         android:layout_width="140dp"
@@ -40,7 +39,6 @@
         android:layout_marginBottom="140dp"
         android:background="#20FFFFFF"/>
 
-    <!-- ✅ DOCK EN BAS -->
     <LinearLayout
         android:id="@+id/dock"
         android:layout_width="match_parent"
@@ -56,7 +54,6 @@
             android:layout_height="80dp"/>
     </LinearLayout>
 
-    <!-- ✅ TIROIR — SANS ANIMATION, AFFICHAGE INSTANTANÉ -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/drawer"
         android:layout_width="match_parent"
