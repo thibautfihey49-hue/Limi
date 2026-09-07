@@ -2,6 +2,7 @@ package com.xiaomi.ultralauncher
 
 import android.app.WallpaperManager
 import android.content.Intent
+import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.GestureDetector
@@ -18,22 +19,34 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-data class App(val pkg: String, val name: String, val icon: Drawable)
+data class App(
+    val pkg: String,
+    val name: String,
+    val icon: Drawable
+)
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var root: FrameLayout
-    private lateinit var clock: TextView
-    private lateinit var date: TextView
-    private lateinit var toggleBar: View
-    private lateinit var dockRecycler: RecyclerView
-    private lateinit var drawer: RecyclerView
+
+    private var root: FrameLayout? = null
+    private var clock: TextView? = null
+    private var date: TextView? = null
+    private var toggleBar: View? = null
+    private var dockRecycler: RecyclerView? = null
+    private var drawer: RecyclerView? = null
+
     private var open = false
     private val fmtTime = SimpleDateFormat("HH:mm", Locale.FRANCE)
     private val fmtDate = SimpleDateFormat("EEEE d MMM", Locale.FRANCE)
     private var apps: List<App> = emptyList()
+
     private val dockPkgs = arrayOf(
-        "com.android.dialer", "com.google.android.gm", "com.android.chrome",
-        "com.google.android.apps.photos", "com.whatsapp", "com.spotify.music", "com.android.camera2"
+        "com.android.dialer",
+        "com.google.android.gm",
+        "com.android.chrome",
+        "com.google.android.apps.photos",
+        "com.whatsapp",
+        "com.spotify.music",
+        "com.android.camera2"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION, Intent.FLAG_ACTIVITY_NO_ANIMATION)
         setContentView(R.layout.activity_launcher)
 
+        // ✅ Récupération SÉCURE des vues
         root = findViewById(R.id.root)
         clock = findViewById(R.id.clock)
         date = findViewById(R.id.date)
@@ -48,98 +62,182 @@ class MainActivity : AppCompatActivity() {
         dockRecycler = findViewById(R.id.dockRecycler)
         drawer = findViewById(R.id.drawer)
 
-        window.setBackgroundDrawable(WallpaperManager.getInstance(this).drawable)
+        // ✅ Fond d'écran SÉCURE
+        try {
+            val wallpaperManager = WallpaperManager.getInstance(this)
+            window.setBackgroundDrawable(wallpaperManager.drawable)
+        } catch (e: Exception) {
+            window.setBackgroundColor(0xFFF5F5F5.toInt())
+        }
 
+        // ✅ Horloge
         updateClock()
-        clock.postDelayed(object : Runnable {
-            override fun run() { updateClock(); clock.postDelayed(this, 60000) }
+        clock?.postDelayed(object : Runnable {
+            override fun run() {
+                updateClock()
+                clock?.postDelayed(this, 60000)
+            }
         }, 60000 - System.currentTimeMillis() % 60000)
 
+        // ✅ Chargement apps
         loadApps()
 
-        dockRecycler.layoutManager = GridLayoutManager(this, 7)
-        dockRecycler.adapter = DockAdapter()
+        // ✅ Dock
+        dockRecycler?.apply {
+            layoutManager = GridLayoutManager(this@MainActivity, 7)
+            adapter = DockAdapter()
+        }
 
-        drawer.layoutManager = GridLayoutManager(this, 4)
-        drawer.adapter = AppAdapter()
+        // ✅ Tiroir
+        drawer?.apply {
+            layoutManager = GridLayoutManager(this@MainActivity, 4)
+            adapter = AppAdapter()
+        }
 
-        toggleBar.setOnClickListener { toggle() }
+        // ✅ Clic barre
+        toggleBar?.setOnClickListener { toggle() }
 
-        root.setOnLongClickListener {
-            startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+        // ✅ Appui long = fond d'écran
+        root?.setOnLongClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+            } catch (_: Exception) {}
             true
         }
 
+        // ✅ Glisser
         val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                vx: Float,
+                vy: Float
+            ): Boolean {
                 if (e1 == null) return false
                 val dy = e2.y - e1.y
-                if (dy > 120 && kotlin.math.abs(vy) > 350) { open(); return true }
-                if (dy < -120 && kotlin.math.abs(vy) > 350) { close(); return true }
+                if (dy > 120 && kotlin.math.abs(vy) > 350) {
+                    openDrawer()
+                    return true
+                }
+                if (dy < -120 && kotlin.math.abs(vy) > 350) {
+                    closeDrawer()
+                    return true
+                }
                 return false
             }
         })
-        root.setOnTouchListener { _, e -> gd.onTouchEvent(e); false }
+
+        root?.setOnTouchListener { _, e ->
+            gd.onTouchEvent(e)
+            false
+        }
     }
 
     private fun updateClock() {
-        clock.text = fmtTime.format(Date())
-        date.text = fmtDate.format(Date())
+        try {
+            clock?.text = fmtTime.format(Date())
+            date?.text = fmtDate.format(Date())
+        } catch (_: Exception) {}
     }
 
     private fun loadApps() {
-        val pm = packageManager
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        apps = pm.queryIntentActivities(intent, 0).map {
-            App(it.activityInfo.packageName, it.loadLabel(pm).toString(), it.loadIcon(pm))
-        }.sortedBy { it.name.lowercase() }
+        try {
+            val pm = packageManager
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+            val resolveInfos: List<ResolveInfo> = pm.queryIntentActivities(intent, 0)
+            apps = resolveInfos
+                .mapNotNull { info ->
+                    try {
+                        App(
+                            pkg = info.activityInfo.packageName,
+                            name = info.loadLabel(pm).toString(),
+                            icon = info.loadIcon(pm)
+                        )
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+                .sortedBy { it.name.lowercase() }
+        } catch (_: Exception) {
+            apps = emptyList()
+        }
     }
 
-    private fun toggle() { if (open) close() else open() }
-    private fun open() { if (open) return; open = true; drawer.visibility = View.VISIBLE }
-    private fun close() { if (!open) return; open = false; drawer.visibility = View.GONE }
+    private fun toggle() {
+        if (open) closeDrawer() else openDrawer()
+    }
+
+    private fun openDrawer() {
+        if (open) return
+        open = true
+        drawer?.visibility = View.VISIBLE
+    }
+
+    private fun closeDrawer() {
+        if (!open) return
+        open = false
+        drawer?.visibility = View.GONE
+    }
 
     private fun launch(pkg: String) {
         try {
-            startActivity(packageManager.getLaunchIntentForPackage(pkg)!!.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            val launchIntent = packageManager.getLaunchIntentForPackage(pkg)
+            if (launchIntent != null) {
+                startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
         } catch (_: Exception) {}
-        if (open) close()
+        if (open) closeDrawer()
     }
 
+    // ✅ Adapter Apps
     inner class AppAdapter : RecyclerView.Adapter<AppAdapter.VH>() {
-        inner class VH(v: View) : RecyclerView.ViewHolder(v) {
-            val icon: ImageView = v.findViewById(R.id.appIcon)
-            val name: TextView = v.findViewById(R.id.appName)
+        inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val icon: ImageView = itemView.findViewById(R.id.appIcon)
+            val name: TextView = itemView.findViewById(R.id.appName)
         }
-        override fun onCreateViewHolder(p: ViewGroup, t: Int): VH {
-            val v = LayoutInflater.from(p.context).inflate(R.layout.item_app, p, false)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+            val v = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_app, parent, false)
             return VH(v)
         }
-        override fun onBindViewHolder(h: VH, i: Int) {
-            val a = apps[i]
-            h.icon.setImageDrawable(a.icon)
-            h.name.text = a.name
-            h.itemView.setOnClickListener { launch(a.pkg) }
+
+        override fun onBindViewHolder(holder: VH, position: Int) {
+            try {
+                val app = apps[position]
+                holder.icon.setImageDrawable(app.icon)
+                holder.name.text = app.name
+                holder.itemView.setOnClickListener { launch(app.pkg) }
+            } catch (_: Exception) {}
         }
-        override fun getItemCount() = apps.size
+
+        override fun getItemCount(): Int = apps.size
     }
 
+    // ✅ Adapter Dock
     inner class DockAdapter : RecyclerView.Adapter<DockAdapter.VH>() {
-        inner class VH(v: View) : RecyclerView.ViewHolder(v) {
-            val icon: ImageView = v.findViewById(R.id.dockIcon)
+        inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val icon: ImageView = itemView.findViewById(R.id.dockIcon)
         }
-        override fun onCreateViewHolder(p: ViewGroup, t: Int): VH {
-            val v = LayoutInflater.from(p.context).inflate(R.layout.item_dock, p, false)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+            val v = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_dock, parent, false)
             return VH(v)
         }
-        override fun onBindViewHolder(h: VH, i: Int) {
-            val pkg = dockPkgs[i]
-            try { h.icon.setImageDrawable(packageManager.getApplicationIcon(pkg)) }
-            catch (_: Exception) {}
-            h.itemView.setOnClickListener { launch(pkg) }
+
+        override fun onBindViewHolder(holder: VH, position: Int) {
+            try {
+                val pkg = dockPkgs[position]
+                holder.icon.setImageDrawable(packageManager.getApplicationIcon(pkg))
+                holder.itemView.setOnClickListener { launch(pkg) }
+            } catch (_: Exception) {}
         }
-        override fun getItemCount() = 7
+
+        override fun getItemCount(): Int = 7
     }
 
-    override fun onBackPressed() { if (open) close() else super.onBackPressed() }
+    override fun onBackPressed() {
+        if (open) closeDrawer() else super.onBackPressed()
+    }
 }
