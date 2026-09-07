@@ -5,8 +5,10 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.GestureDetector
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -110,7 +112,7 @@ class MainActivity : AppCompatActivity() {
             val name: TextView = v.findViewById(R.id.appName)
         }
         override fun onCreateViewHolder(p: ViewGroup, t: Int): VH {
-            val v = layoutInflater.inflate(R.layout.item_app, p, false)
+            val v = LayoutInflater.from(p.context).inflate(R.layout.item_app, p, false)
             return VH(v)
         }
         override fun onBindViewHolder(h: VH, i: Int) {
@@ -127,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             val icon: ImageView = v.findViewById(R.id.dockIcon)
         }
         override fun onCreateViewHolder(p: ViewGroup, t: Int): VH {
-            val v = layoutInflater.inflate(R.layout.item_dock, p, false)
+            val v = LayoutInflater.from(p.context).inflate(R.layout.item_dock, p, false)
             return VH(v)
         }
         override fun onBindViewHolder(h: VH, i: Int) {
