@@ -2,11 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
-
 android {
     namespace = "com.xiaomi.ultralauncher"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.xiaomi.ultralauncher"
         minSdk = 26
@@ -14,7 +12,6 @@ android {
         versionCode = 1
         versionName = "1.0-editable-dock"
     }
-
     buildTypes {
         debug { isDebuggable = true }
         release {
@@ -22,17 +19,13 @@ android {
             isShrinkResources = true
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
     kotlinOptions { jvmTarget = "17" }
-
     buildFeatures { viewBinding = false }
 }
-
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

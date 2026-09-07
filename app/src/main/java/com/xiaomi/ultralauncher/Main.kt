@@ -68,10 +68,8 @@ class MainActivity : AppCompatActivity() {
         dockRecycler = findViewById(R.id.dockRecycler)
         drawer = findViewById(R.id.drawer)
 
-        // ✅ Charger les apps du dock sauvegardées
         loadDockSlots()
 
-        // ✅ Fond d'écran
         try {
             val wallpaperManager = WallpaperManager.getInstance(this)
             window.setBackgroundDrawable(wallpaperManager.drawable)
@@ -135,7 +133,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Charger les emplacements du dock sauvegardés
     private fun loadDockSlots() {
         dockSlots = mutableListOf()
         val saved = prefs.getStringSet(DOCK_SLOTS_KEY, null)
@@ -144,7 +141,6 @@ class MainActivity : AppCompatActivity() {
                 dockSlots.add(DockSlot(pkg.ifEmpty { null }))
             }
         } else {
-            // Valeurs par défaut
             val defaultPkgs = listOf(
                 "com.android.dialer",
                 "com.google.android.gm",
@@ -160,7 +156,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Sauvegarder les emplacements du dock
     private fun saveDockSlots() {
         val toSave = dockSlots.map { it.pkg ?: "" }.toSet()
         prefs.edit().putStringSet(DOCK_SLOTS_KEY, toSave).apply()
@@ -196,21 +191,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggle() {
-        if (open) closeDrawer() else openDrawer()
-    }
-
-    private fun openDrawer() {
-        if (open) return
-        open = true
-        drawer?.visibility = View.VISIBLE
-    }
-
-    private fun closeDrawer() {
-        if (!open) return
-        open = false
-        drawer?.visibility = View.GONE
-    }
+    private fun toggle() { if (open) closeDrawer() else openDrawer() }
+    private fun openDrawer() { if (open) return; open = true; drawer?.visibility = View.VISIBLE }
+    private fun closeDrawer() { if (!open) return; open = false; drawer?.visibility = View.GONE }
 
     private fun launch(pkg: String) {
         try {
@@ -222,7 +205,6 @@ class MainActivity : AppCompatActivity() {
         if (open) closeDrawer()
     }
 
-    // ✅ Ouvrir la boîte de dialogue pour choisir une app
     private fun showAppPicker(slotIndex: Int) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_app_picker)
@@ -240,19 +222,15 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    // ✅ Adapter pour le tiroir d'applications
     inner class AppAdapter : RecyclerView.Adapter<AppAdapter.VH>() {
         inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val icon: ImageView = itemView.findViewById(R.id.appIcon)
             val name: TextView = itemView.findViewById(R.id.appName)
         }
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_app, parent, false)
+            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
             return VH(v)
         }
-
         override fun onBindViewHolder(holder: VH, position: Int) {
             try {
                 val app = allApps[position]
@@ -261,22 +239,17 @@ class MainActivity : AppCompatActivity() {
                 holder.itemView.setOnClickListener { launch(app.pkg) }
             } catch (_: Exception) {}
         }
-
-        override fun getItemCount(): Int = allApps.size
+        override fun getItemCount() = allApps.size
     }
 
-    // ✅ Adapter pour le dock — CLIQUE = LANCER, CLIC LONG = CHANGER
     inner class DockAdapter : RecyclerView.Adapter<DockAdapter.VH>() {
         inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val icon: ImageView = itemView.findViewById(R.id.dockIcon)
         }
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_dock, parent, false)
+            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_dock, parent, false)
             return VH(v)
         }
-
         override fun onBindViewHolder(holder: VH, position: Int) {
             try {
                 val slot = dockSlots[position]
@@ -285,24 +258,13 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     holder.icon.setImageResource(R.drawable.ic_empty_slot)
                 }
-
-                // ✅ CLIC COURT → Lancer l'application
-                holder.itemView.setOnClickListener {
-                    slot.pkg?.let { pkg -> launch(pkg) }
-                }
-
-                // ✅ CLIC LONG → Choisir une nouvelle application
-                holder.itemView.setOnLongClickListener {
-                    showAppPicker(position)
-                    true
-                }
+                holder.itemView.setOnClickListener { slot.pkg?.let { launch(it) } }
+                holder.itemView.setOnLongClickListener { showAppPicker(position); true }
             } catch (_: Exception) {}
         }
-
-        override fun getItemCount(): Int = DOCK_SIZE
+        override fun getItemCount() = DOCK_SIZE
     }
 
-    // ✅ Adapter pour la boîte de dialogue de choix d'app
     inner class AppPickerAdapter(
         private val apps: List<App>,
         private val onAppSelected: (App) -> Unit
@@ -311,24 +273,18 @@ class MainActivity : AppCompatActivity() {
             val icon: ImageView = itemView.findViewById(R.id.appIcon)
             val name: TextView = itemView.findViewById(R.id.appName)
         }
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_app, parent, false)
+            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
             return VH(v)
         }
-
         override fun onBindViewHolder(holder: VH, position: Int) {
             val app = apps[position]
             holder.icon.setImageDrawable(app.icon)
             holder.name.text = app.name
             holder.itemView.setOnClickListener { onAppSelected(app) }
         }
-
-        override fun getItemCount(): Int = apps.size
+        override fun getItemCount() = apps.size
     }
 
-    override fun onBackPressed() {
-        if (open) closeDrawer() else super.onBackPressed()
-    }
+    override fun onBackPressed() { if (open) closeDrawer() else super.onBackPressed() }
 }
